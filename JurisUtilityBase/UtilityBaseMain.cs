@@ -94,107 +94,83 @@ namespace JurisUtilityBase
 
         private void DoDaFix()
         {
+            string sql;
+            string matsys;
+            string period;
+            string yr;
+            string hours;
+            string h2b;
+            string amount;
+            string std;
+            string tkpr;
+            string taskcd;
+            string actcd;
 
-            List<int> matList = new List<int>();
-            string matters = "";
-            //get all matters that are nonbillable or probono
-            string sql = "SELECT MatSysNbr FROM Matter where MatBillAgreeCode in ('N', 'B')";
-            DataSet ds = _jurisUtility.RecordsetFromSQL(sql);
+            string SQLFSP = "select mattersysnbr,periodnumber, periodyear,timekeepersysnbr, isnull(TaskCode,'') as TaskCd, isnull(activitycode,'') as ActivityCd, sum(actualhourswork) as Hours,sum(hourstobill) as H2B, sum(amount) as Amount, sum(AmountAtStandardRate) as StdAmt from timeentry  where entrysource='JurisGo' and entrystatus>=7 and billableflag='Y' and MatterSysNbr in (select matsysnbr from matter where matbillagreecode in ('N','B')) " +
+                " group by mattersysnbr,periodnumber, periodyear,timekeepersysnbr, isnull(TaskCode,''), isnull(activitycode,'') ";
+            DataSet myRSFSP = _jurisUtility.RecordsetFromSQL(SQLFSP);
 
-            foreach (DataRow row in ds.Tables[0].Rows)
-                matList.Add(Convert.ToInt32(row["MatSysNbr"].ToString()));
 
-            //take that list and Update those matters on each respective table
-            //timeentry
-            foreach (int mat in matList)
-            {
-                matters = mat.ToString() + ",";
-            }
-            matters = matters.TrimEnd(',');
 
-            UpdateStatus("Updating TimeEntry...", 1, 7);
-            sql = "update TimeEntry set BillableFlag = 'N' where MatterSysNbr in (" + matters + ")";
-            _jurisUtility.ExecuteNonQueryCommand(0, sql);
-
-            UpdateStatus("Updating TimeBatch...", 2,7);
+            UpdateStatus("Updating Fee Sum by Period and ITD...", 1, 7);
             //timebatchdetail
-            sql = "update TimeBatchDetail set TBDBillableFlg = 'N' where TBDMatter in (" + matters + ")";
+
+            if (myRSFSP.Tables[0].Rows.Count == 0)
+                sql = "no records";
+            else
+            {
+                foreach (DataTable table in myRSFSP.Tables)
+                {
+
+                    foreach (DataRow dr in table.Rows)
+                    {
+                         matsys = dr["mattersysnbr"].ToString();
+                        period = dr["periodnumber"].ToString();
+                        yr = dr["periodyear"].ToString();
+                        hours = dr["Hours"].ToString();
+                        h2b = dr["H2B"].ToString();
+                        amount = dr["Amount"].ToString();
+                        std = dr["StdAmt"].ToString();
+                        tkpr = dr["timekeepersysnbr"].ToString();
+                        taskcd = dr["TaskCd"].ToString();
+                        actcd = dr["ActivityCd"].ToString();
+
+                        sql = "update feesumbyprd set fspnonbilhrsentered=fspnonbilhrsentered + cast('" + hours + "' as decimal(12,2)),FSPBilHrsEntered=FSPBilHrsEntered - cast('" + hours + "' as decimal(12,2)),FSPFeeEnteredActualValue=FSPFeeEnteredActualValue - cast('" + amount + "' as decimal(12,2)) " +
+         " where fspmatter=" + matsys + " and fspprdyear=" + yr + " and fspprdnbr=" + period + " and fsptkpr=" + tkpr + " and isnull(fsptaskcd,'')='" + taskcd + "' and isnull(fspactivitycd,'')='" + actcd + "' ";
+                   _jurisUtility.ExecuteNonQueryCommand(0,sql);
+
+
+
+                        sql = "update feesumitd  set fsinonbilhrsentered=fsinonbilhrsentered + cast('" + hours + "' as decimal(12,2)),FSiBilHrsEntered=FSiBilHrsEntered - cast('" + hours + "' as decimal(12,2)),FSiFeeEnteredActualValue=FSiFeeEnteredActualValue - cast('" + amount + "' as decimal(12,2)) " +
+         " where fsimatter=" + matsys +  " and fsitkpr=" + tkpr ;
+                        _jurisUtility.ExecuteNonQueryCommand(0, sql);
+                    }
+                }
+
+            }
+
+
+
+
+
+            UpdateStatus("Updating TimeBatch...", 3,7);
+            //timebatchdetail
+            sql = "update TimeBatchDetail set TBDBillableFlg = 'N' where tbdid in (select tbdid from timeentrylink inner join timeentry on timeentrylink.entryid=timeentry.entryid where entrysource='JurisGo' and entrystatus>=7 and billableflag='Y'  and MatterSysNbr in (select matsysnbr from matter where matbillagreecode in ('N','B')))";
             _jurisUtility.ExecuteNonQueryCommand(0, sql);
 
-            UpdateStatus("Updating UnbilledTime...", 3,7);
+            UpdateStatus("Updating UnbilledTime...", 4,7);
             //unbilledtime
-            sql = "update unbilledtime set UTBillableFlg = 'N' " 
-	                + "from unbilledtime "
-	                + "inner join timeentrylink aa on utid = aa.tbdid "
-	                + "inner join timeentry bb on aa.entryid = bb.entryid "
-                    + "where MatterSysNbr in (" + matters + ")";
+            sql = "update unbilledtime set UTBillableFlg = 'N'  where utid in (select tbdid from timeentrylink inner join timeentry on timeentrylink.entryid=timeentry.entryid where entrysource='JurisGo' and entrystatus>=7 and billableflag='Y'  and MatterSysNbr in (select matsysnbr from matter where matbillagreecode in ('N','B')))";
             _jurisUtility.ExecuteNonQueryCommand(0, sql);
 
-            UpdateStatus("Updating BilledTime...", 4,7);
+            UpdateStatus("Updating BilledTime...", 5,7);
             //billedtime
-            sql = "update billedtime set BTBillableFlg = 'N' "
-                    + "from billedtime "
-                    + "inner join timeentrylink aa on btid = aa.tbdid "
-                    + "inner join timeentry bb on aa.entryid = bb.entryid "
-                    + "where MatterSysNbr in (" + matters + ")";
+            sql = "update billedtime set BTBillableFlg = 'N'   where btid in (select tbdid from timeentrylink inner join timeentry on timeentrylink.entryid=timeentry.entryid where entrysource='JurisGo' and entrystatus>=7 and billableflag='Y'  and MatterSysNbr in (select matsysnbr from matter where matbillagreecode in ('N','B')))";
             _jurisUtility.ExecuteNonQueryCommand(0, sql);
 
-            UpdateStatus("Updating FeeSumByPrd...", 5,7);
-            //feesumbyprd
-            sql=" update FeeSumByPrd set [FSPNonBilHrsEntered] = hhb.FSPBilHrsEntered,[FSPBilHrsEntered] = hhb.FSPBilHrsEntered " +
-            " ,[FSPFeeEnteredActualValue] = hhb.FSPFeeEnteredActualValue from " +
-            " ( " +
-            " select matter, yr, prd, tkpr, task, act, sum(FSPBilHrsEntered) as FSPBilHrsEntered, sum(FSPNonBilHrsEntered) as FSPNonBilHrsEntered, " +
-            " sum(FSPFeeEnteredActualValue) as FSPFeeEnteredActualValue " +
-            " from ( " +
-            " SELECT  [UTMatter] as matter,[UTPrdYear] as yr,[UTPrdNbr] as prd,[UTTkpr]  as tkpr,[UTTaskCd] as task ,[UTActivityCd] as act " +
-            " 	  ,sum(case when UTBillableFlg = 'Y' then [UTHoursToBill] else 0 end) as FSPBilHrsEntered " +
-            " 	  ,sum(case when UTBillableFlg = 'N' then [UTActualHrsWrk] else 0 end) as FSPNonBilHrsEntered " +
-            "       ,sum([UTAmount]) as FSPFeeEnteredActualValue " +
-            "   FROM [UnbilledTime] " +
-            " group by [UTMatter],[UTPrdYear],[UTPrdNbr] ,[UTTkpr] ,[UTTaskCd] ,[UTActivityCd] " +
-            " union all " +
-            " SELECT  [BTMatter] as matter,[BTPrdYear] as yr,[BTPrdNbr] as prd,[BTWrkTkpr] as tkpr ,[BTTaskCd] as task ,[BTActivityCd] as act " +
-            "       ,sum(case when BTBillableFlg = 'Y' then [BTHoursToBill] else 0 end) as FSPBilHrsEntered " +
-            " 	  ,sum(case when BTBillableFlg = 'N' then [BTActualHrsWrk] else 0 end) as FSPNonBilHrsEntered " +
-            "       ,sum([BTAmount]) as FSPFeeEnteredActualValue " +
-            "   FROM [BilledTime] " +
-            "   group by [BTMatter] ,[BTPrdYear],[BTPrdNbr] ,[BTWrkTkpr] ,[BTTaskCd] ,[BTActivityCd] ) llk " +
-            "   where yr = 2020 and matter in (" + matters + ") " +
-            "   group by matter, yr, prd, tkpr, task, act) hhb " +
-            "   where [FSPMatter]= hhb.matter and [FSPPrdYear] = hhb.yr and [FSPPrdNbr] = hhb.prd and [FSPTkpr] = hhb.tkpr  " +
-            "   and [FSPTaskCd] = hhb.task and [FSPActivityCd] = hhb.act ";
 
-            _jurisUtility.ExecuteNonQueryCommand(0, sql);
-
-            UpdateStatus("Updating FeeSumITD...", 6,7);
-            //feesumitd
-            sql = " update FeeSumITD set [FSINonBilHrsEntered] = hhb.FSPBilHrsEntered,[FSIBilHrsEntered] = hhb.FSPBilHrsEntered " +
-            " ,[FSIFeeEnteredActualValue] = hhb.FSPFeeEnteredActualValue from " +
-            " ( " +
-            " select matter,  tkpr, sum(FSPBilHrsEntered) as FSPBilHrsEntered, sum(FSPNonBilHrsEntered) as FSPNonBilHrsEntered, " +
-            " sum(FSPFeeEnteredActualValue) as FSPFeeEnteredActualValue " +
-            " from ( " +
-            " SELECT  [UTMatter] as matter,[UTTkpr]  as tkpr " +
-            " 	  ,sum(case when UTBillableFlg = 'Y' then [UTHoursToBill] else 0 end) as FSPBilHrsEntered " +
-            " 	  ,sum(case when UTBillableFlg = 'N' then [UTActualHrsWrk] else 0 end) as FSPNonBilHrsEntered " +
-            "       ,sum([UTAmount]) as FSPFeeEnteredActualValue " +
-            "     , sum([UTHoursToBill]) as WIPHrs " +
-            "     , sum([UTAmount]) as WIPBal " +
-            "   FROM [UnbilledTime] " +
-            " group by [UTMatter],[UTTkpr]  " +
-            " union all " +
-            " SELECT  [BTMatter] as matter, [BTWrkTkpr] as tkpr  " +
-            "       ,sum(case when BTBillableFlg = 'Y' then [BTHoursToBill] else 0 end) as FSPBilHrsEntered " +
-            " 	  ,sum(case when BTBillableFlg = 'N' then [BTActualHrsWrk] else 0 end) as FSPNonBilHrsEntered " +
-            "       ,sum([BTAmount]) as FSPFeeEnteredActualValue " +
-            "      , 0 as WIPHrs, 0 as WIPBal " +
-            "   FROM [BilledTime] " +
-            "   group by [BTMatter] ,[BTPrdYear],[BTPrdNbr] ,[BTWrkTkpr] ,[BTTaskCd] ,[BTActivityCd] ) llk " +
-            "   where matter in (" + matters + ") " +
-            "   group by matter, tkpr) hhb " +
-            "   where [FSIMatter]= hhb.matter  and [FSITkpr] = hhb.tkpr  ";
-
+            UpdateStatus("Updating TimeEntry...", 6, 7);
+            sql = "update TimeEntry set BillableFlag = 'N' where entrysource='JurisGo' and entrystatus>=7 and billableflag='Y'  and MatterSysNbr in (select matsysnbr from matter where matbillagreecode in ('N','B'))";
             _jurisUtility.ExecuteNonQueryCommand(0, sql);
 
             UpdateStatus("All tables updated.", 7, 7);
