@@ -24,17 +24,6 @@ C:\Utils\.Net Juris Utils\Juris Utility Base\JurisUtilityBase\obj\x86\Release\Ju
 C:\Utils\.Net Juris Utils\Juris Utility Base\JurisUtilityBase\obj\x86\Release\JurisUtility.application
 C:\Utils\.Net Juris Utils\Juris Utility Base\JurisUtilityBase\obj\x86\Release\JurisUtility.exe
 C:\Utils\.Net Juris Utils\Juris Utility Base\JurisUtilityBase\obj\x86\Release\JurisUtility.pdb
-D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JurisUtilityBase.csprojAssemblyReference.cache
-D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JurisUtilityBase.csproj.ResolveComReference.cache
-D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JurisUtilityBase.PrinterDialog.resources
-D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JurisUtilityBase.ReportDisplay.resources
-D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JurisUtilityBase.UtilityBaseMain.resources
-D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JurisUtilityBase.Properties.Resources.resources
-D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JurisUtilityBase.SplashScreen.resources
-D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JurisUtilityBase.csproj.GenerateResource.cache
-D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JurisUtilityBase.csproj.CoreCompileInputs.cache
-D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JPS - JurisGo Time Fixer.exe
-D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JPS - JurisGo Time Fixer.pdb
 D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\bin\x86\Release\JPS - JurisGo Time Fixer.exe.config
 D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\bin\x86\Release\JPS - JurisGo Time Fixer.exe.manifest
 D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\bin\x86\Release\JPS - JurisGo Time Fixer.application
@@ -51,6 +40,16 @@ D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\bin\x86\Release
 D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\bin\x86\Release\JurisStr21.dll
 D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\bin\x86\Release\JurisStr221.dll
 D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\bin\x86\Release\JurisSVR21.dll
+D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JurisUtilityBase.csproj.ResolveComReference.cache
+D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JurisUtilityBase.PrinterDialog.resources
+D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JurisUtilityBase.ReportDisplay.resources
+D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JurisUtilityBase.UtilityBaseMain.resources
+D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JurisUtilityBase.Properties.Resources.resources
+D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JurisUtilityBase.SplashScreen.resources
+D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JurisUtilityBase.csproj.GenerateResource.cache
+D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JurisUtilityBase.csproj.CoreCompileInputs.cache
 D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JPS - JurisGo Time Fixer.exe.manifest
 D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JPS - JurisGo Time Fixer.application
 D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JurisUtilityBase.csproj.CopyComplete
+D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JPS - JurisGo Time Fixer.exe
+D:\Utility Repository\JPS---Juris-Go-Time-Fixer\JurisUtilityBase\obj\x86\Release\JPS - JurisGo Time Fixer.pdb
