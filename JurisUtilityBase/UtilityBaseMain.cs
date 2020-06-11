@@ -12,6 +12,8 @@ using JDataEngine;
 using JurisAuthenticator;
 using JurisUtilityBase.Properties;
 using System.Data.OleDb;
+using Gizmox.CSharp;
+using System.Linq.Expressions;
 
 namespace JurisUtilityBase
 {
@@ -48,11 +50,11 @@ namespace JurisUtilityBase
         public void LoadCompanies()
         {
             var companies = _jurisUtility.Companies.Cast<object>().Cast<Instance>().ToList();
-//            listBoxCompanies.SelectedIndexChanged -= listBoxCompanies_SelectedIndexChanged;
+            //            listBoxCompanies.SelectedIndexChanged -= listBoxCompanies_SelectedIndexChanged;
             listBoxCompanies.ValueMember = "Code";
             listBoxCompanies.DisplayMember = "Key";
             listBoxCompanies.DataSource = companies;
-//            listBoxCompanies.SelectedIndexChanged += listBoxCompanies_SelectedIndexChanged;
+            //            listBoxCompanies.SelectedIndexChanged += listBoxCompanies_SelectedIndexChanged;
             var defaultCompany = companies.FirstOrDefault(c => c.Default == Instance.JurisDefaultCompany.jdcJuris);
             if (companies.Count > 0)
             {
@@ -95,53 +97,36 @@ namespace JurisUtilityBase
         private void DoDaFix()
         {
 
-            List<int> matList = new List<int>();
-            string matters = "";
-            //get all matters that are nonbillable or probono
-            string sql = "SELECT MatSysNbr FROM Matter where MatBillAgreeCode in ('N', 'B')";
-            DataSet ds = _jurisUtility.RecordsetFromSQL(sql);
-
-            foreach (DataRow row in ds.Tables[0].Rows)
-                matList.Add(Convert.ToInt32(row["MatSysNbr"].ToString()));
-
-            //take that list and Update those matters on each respective table
-            //timeentry
-            foreach (int mat in matList)
-            {
-                matters = mat.ToString() + ",";
-            }
-            matters = matters.TrimEnd(',');
+            string sql = "";
 
             UpdateStatus("Updating TimeEntry...", 1, 7);
-            sql = "update TimeEntry set BillableFlag = 'N' where MatterSysNbr in (" + matters + ")";
+            sql = "update TimeEntry set BillableFlag = 'N' " +
+                "where MatterSysNbr in (SELECT MatSysNbr FROM Matter where MatBillAgreeCode in ('N', 'B'))  and entrysource = 'JurisGo'";
             _jurisUtility.ExecuteNonQueryCommand(0, sql);
 
-            UpdateStatus("Updating TimeBatch...", 2,7);
+            UpdateStatus("Updating TimeBatch...", 2, 7);
             //timebatchdetail
-            sql = "update TimeBatchDetail set TBDBillableFlg = 'N' where TBDMatter in (" + matters + ")";
+            sql = "  update timebatchdetail set TBDBillableFlg = 'N' " +
+                    " where timebatchdetail.tbdid in (" +
+                    " select timebatchdetail.tbdid FROM  [TimeEntry] " +
+                    " inner join TimeEntryLink on timeentrylink.entryid = timeentry.entryid " +
+                    " inner join timebatchdetail on timeentrylink.tbdid = timebatchdetail.tbdid " +
+                    " inner join matter on matsysnbr = mattersysnbr " +
+                    " where MatBillAgreeCode in ('N', 'B')  and entrysource = 'JurisGo' and tbdrectype in (1,2)) ";
             _jurisUtility.ExecuteNonQueryCommand(0, sql);
 
-            UpdateStatus("Updating UnbilledTime...", 3,7);
+            UpdateStatus("Updating UnbilledTime...", 3, 7);
             //unbilledtime
-            sql = "update unbilledtime set UTBillableFlg = 'N' " 
-	                + "from unbilledtime "
-	                + "inner join timeentrylink aa on utid = aa.tbdid "
-	                + "inner join timeentry bb on aa.entryid = bb.entryid "
-                    + "where MatterSysNbr in (" + matters + ")";
-            _jurisUtility.ExecuteNonQueryCommand(0, sql);
-
-            UpdateStatus("Updating BilledTime...", 4,7);
-            //billedtime
-            sql = "update billedtime set BTBillableFlg = 'N' "
-                    + "from billedtime "
-                    + "inner join timeentrylink aa on btid = aa.tbdid "
+            sql = "update unbilledtime set UTBillableFlg = 'N' "
+                    + "from unbilledtime "
+                    + "inner join timeentrylink aa on utid = aa.tbdid "
                     + "inner join timeentry bb on aa.entryid = bb.entryid "
-                    + "where MatterSysNbr in (" + matters + ")";
+                    + "where MatterSysNbr in (SELECT MatSysNbr FROM Matter where MatBillAgreeCode in ('N', 'B'))  and entrysource = 'JurisGo'";
             _jurisUtility.ExecuteNonQueryCommand(0, sql);
 
-            UpdateStatus("Updating FeeSumByPrd...", 5,7);
+            UpdateStatus("Updating FeeSumByPrd...", 5, 7);
             //feesumbyprd
-            sql=" update FeeSumByPrd set [FSPNonBilHrsEntered] = hhb.FSPBilHrsEntered,[FSPBilHrsEntered] = hhb.FSPBilHrsEntered " +
+            sql = " update FeeSumByPrd set [FSPNonBilHrsEntered] = hhb.FSPBilHrsEntered,[FSPBilHrsEntered] = hhb.FSPBilHrsEntered " +
             " ,[FSPFeeEnteredActualValue] = hhb.FSPFeeEnteredActualValue from " +
             " ( " +
             " select matter, yr, prd, tkpr, task, act, sum(FSPBilHrsEntered) as FSPBilHrsEntered, sum(FSPNonBilHrsEntered) as FSPNonBilHrsEntered, " +
@@ -160,14 +145,14 @@ namespace JurisUtilityBase
             "       ,sum([BTAmount]) as FSPFeeEnteredActualValue " +
             "   FROM [BilledTime] " +
             "   group by [BTMatter] ,[BTPrdYear],[BTPrdNbr] ,[BTWrkTkpr] ,[BTTaskCd] ,[BTActivityCd] ) llk " +
-            "   where yr = 2020 and matter in (" + matters + ") " +
+            "   where yr >= 2019 and matter in (SELECT MatSysNbr FROM Matter where MatBillAgreeCode in ('N', 'B')) " +
             "   group by matter, yr, prd, tkpr, task, act) hhb " +
             "   where [FSPMatter]= hhb.matter and [FSPPrdYear] = hhb.yr and [FSPPrdNbr] = hhb.prd and [FSPTkpr] = hhb.tkpr  " +
             "   and [FSPTaskCd] = hhb.task and [FSPActivityCd] = hhb.act ";
 
             _jurisUtility.ExecuteNonQueryCommand(0, sql);
 
-            UpdateStatus("Updating FeeSumITD...", 6,7);
+            UpdateStatus("Updating FeeSumITD...", 6, 7);
             //feesumitd
             sql = " update FeeSumITD set [FSINonBilHrsEntered] = hhb.FSPBilHrsEntered,[FSIBilHrsEntered] = hhb.FSPBilHrsEntered " +
             " ,[FSIFeeEnteredActualValue] = hhb.FSPFeeEnteredActualValue from " +
@@ -191,7 +176,7 @@ namespace JurisUtilityBase
             "      , 0 as WIPHrs, 0 as WIPBal " +
             "   FROM [BilledTime] " +
             "   group by [BTMatter] ,[BTPrdYear],[BTPrdNbr] ,[BTWrkTkpr] ,[BTTaskCd] ,[BTActivityCd] ) llk " +
-            "   where matter in (" + matters + ") " +
+            "   where matter in (SELECT MatSysNbr FROM Matter where MatBillAgreeCode in ('N', 'B')) " +
             "   group by matter, tkpr) hhb " +
             "   where [FSIMatter]= hhb.matter  and [FSITkpr] = hhb.tkpr  ";
 
@@ -248,7 +233,7 @@ namespace JurisUtilityBase
             double retNum;
 
             bool isNum = Double.TryParse(Convert.ToString(Expression), System.Globalization.NumberStyles.Any, System.Globalization.NumberFormatInfo.InvariantInfo, out retNum);
-            return isNum; 
+            return isNum;
         }
 
         private void WriteLog(string comment)
@@ -284,7 +269,7 @@ namespace JurisUtilityBase
             }
             else
             {
-                double pctLong = Math.Round(((double)step/steps)*100.0);
+                double pctLong = Math.Round(((double)step / steps) * 100.0);
                 int percentage = (int)Math.Round(pctLong, 0);
                 if ((percentage < 0) || (percentage > 100))
                 {
@@ -327,7 +312,7 @@ namespace JurisUtilityBase
                 File.Copy(filePathName + ".ark1", filePathName + ".ark2");
                 File.Delete(filePathName + ".ark1");
             }
-            if (File.Exists(filePathName ))
+            if (File.Exists(filePathName))
             {
                 File.Copy(filePathName, filePathName + ".ark1");
                 File.Delete(filePathName);
@@ -335,7 +320,7 @@ namespace JurisUtilityBase
 
         }
 
-            
+
 
         private void LogFile(string LogLine)
         {
@@ -344,7 +329,7 @@ namespace JurisUtilityBase
             using (StreamWriter sw = File.AppendText(filePathName))
             {
                 sw.WriteLine(LogLine);
-            }	
+            }
         }
         #endregion
 
@@ -355,37 +340,45 @@ namespace JurisUtilityBase
 
         private void buttonReport_Click(object sender, EventArgs e)
         {
+            try
+            {
+                string SQL = " DROP TABLE ##TempGo";
+                _jurisUtility.ExecuteNonQueryCommand(0, SQL);
+            }
+            catch(Exception ex1)
+            { 
+            }
+            try
+            {
+                string SQL = " DROP TABLE ##TempGo2";
+                _jurisUtility.ExecuteNonQueryCommand(0, SQL);
+            }
+            catch (Exception ex1)
+            {
+            }
 
             System.Environment.Exit(0);
-          
         }
 
-        private string getReportSQL()
+        private void button2_Click(object sender, EventArgs e) //add number of time entries on each bill/matter
         {
-            string reportSQL = "";
-            //if matter and billing timekeeper
-            if (true)
-                reportSQL = "select Clicode, Clireportingname, Matcode, Matreportingname,empinitials as CurrentBillingTimekeeper, 'DEF' as NewBillingTimekeeper" +
-                        " from matter" +
-                        " inner join client on matclinbr=clisysnbr" +
-                        " inner join billto on matbillto=billtosysnbr" +
-                        " inner join employee on empsysnbr=billtobillingatty" +
-                        " where empinitials<>'ABC'";
+            string SQL = "select distinct dbo.jfn_FormatClientCode(clicode) as ClientCode, dbo.jfn_FormatMatterCode(MatCode) as MatterCode, "+
+" arbillnbr as BillNo, convert(varchar, arbilldate, 101) as BillDate, count(bb.EntryID) as TotalEntries from billedtime " +
+"inner join timeentrylink aa on btid = aa.tbdid " +
+"inner join timeentry bb on aa.entryid = bb.entryid " +
+"inner join ARBill on arbillnbr = btbillnbr " + 
+"Inner join matter on matsysnbr = btmatter " +
+"inner join Client on clisysnbr = matclinbr " +
+"where MatterSysNbr in (SELECT MatSysNbr FROM Matter where MatBillAgreeCode in ('N', 'B')) and entrysource = 'JurisGo' " +
+" and (billedtime.btbillnbr not in (select btbillnbr from ##TempGo where ##TempGo.btbillnbr in (select btbillnbr from ##TempGo2) and ##TempGo.BillableFlag = 'N')) " +
+" group by clicode, matcode, arbillnbr, arbilldate";
+
+            DataSet ff = _jurisUtility.RecordsetFromSQL(SQL);
+
+            ReportDisplay rp = new ReportDisplay(ff);
+            rp.ShowDialog();
 
 
-            //if matter and originating timekeeper
-            else if (false)
-                reportSQL = "select Clicode, Clireportingname, Matcode, Matreportingname,empinitials as CurrentOriginatingTimekeeper, 'DEF' as NewOriginatingTimekeeper" +
-                    " from matter" +
-                    " inner join client on matclinbr=clisysnbr" +
-                    " inner join matorigatty on matsysnbr=morigmat" +
-                    " inner join employee on empsysnbr=morigatty" +
-                    " where empinitials<>'ABC'";
-
-
-            return reportSQL;
         }
-
-
     }
 }

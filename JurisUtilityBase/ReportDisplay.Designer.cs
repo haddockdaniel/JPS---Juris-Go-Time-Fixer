@@ -32,6 +32,7 @@
             this.buttonPrint = new System.Windows.Forms.Button();
             this.buttonBack = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -44,7 +45,7 @@
             this.buttonPrint.Name = "buttonPrint";
             this.buttonPrint.Size = new System.Drawing.Size(148, 38);
             this.buttonPrint.TabIndex = 11;
-            this.buttonPrint.Text = "Print";
+            this.buttonPrint.Text = "Save as CSV";
             this.buttonPrint.UseVisualStyleBackColor = false;
             this.buttonPrint.Click += new System.EventHandler(this.buttonPrint_Click);
             // 
@@ -64,9 +65,9 @@
             // dataGridView1
             // 
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(15, -20);
+            this.dataGridView1.Location = new System.Drawing.Point(15, 12);
             this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(1000, 387);
+            this.dataGridView1.Size = new System.Drawing.Size(1000, 355);
             this.dataGridView1.TabIndex = 9;
             // 
             // ReportDisplay
@@ -90,5 +91,6 @@
         private System.Windows.Forms.Button buttonPrint;
         private System.Windows.Forms.Button buttonBack;
         private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog1;
     }
 }

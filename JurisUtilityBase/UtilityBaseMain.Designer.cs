@@ -42,6 +42,8 @@
             this.OpenFileDialogOpen = new System.Windows.Forms.OpenFileDialog();
             this.buttonReport = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.JurisLogoImageBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.LexisNexisLogoPictureBox)).BeginInit();
             this.statusStrip.SuspendLayout();
@@ -151,7 +153,7 @@
             this.buttonReport.BackColor = System.Drawing.Color.LightGray;
             this.buttonReport.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonReport.ForeColor = System.Drawing.Color.MidnightBlue;
-            this.buttonReport.Location = new System.Drawing.Point(130, 333);
+            this.buttonReport.Location = new System.Drawing.Point(489, 343);
             this.buttonReport.Name = "buttonReport";
             this.buttonReport.Size = new System.Drawing.Size(148, 38);
             this.buttonReport.TabIndex = 16;
@@ -164,13 +166,37 @@
             this.button1.BackColor = System.Drawing.Color.LightGray;
             this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button1.ForeColor = System.Drawing.Color.MidnightBlue;
-            this.button1.Location = new System.Drawing.Point(447, 333);
+            this.button1.Location = new System.Drawing.Point(118, 260);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(148, 38);
+            this.button1.Size = new System.Drawing.Size(519, 38);
             this.button1.TabIndex = 17;
-            this.button1.Text = "Run";
+            this.button1.Text = "2) Correct all Unbilled Entries";
             this.button1.UseVisualStyleBackColor = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // button2
+            // 
+            this.button2.BackColor = System.Drawing.Color.LightGray;
+            this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button2.ForeColor = System.Drawing.Color.MidnightBlue;
+            this.button2.Location = new System.Drawing.Point(111, 166);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(535, 38);
+            this.button2.TabIndex = 18;
+            this.button2.Text = "1) Generate List of Affected Bills";
+            this.button2.UseVisualStyleBackColor = false;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
+            this.label1.ForeColor = System.Drawing.Color.MidnightBlue;
+            this.label1.Location = new System.Drawing.Point(115, 226);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(234, 16);
+            this.label1.TabIndex = 19;
+            this.label1.Text = "After Unposting all Affected Bills:";
             // 
             // UtilityBaseMain
             // 
@@ -179,6 +205,8 @@
             this.BackColor = System.Drawing.SystemColors.Window;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(658, 413);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.buttonReport);
             this.Controls.Add(this.statusGroupBox);
@@ -222,6 +250,8 @@
         private System.Windows.Forms.OpenFileDialog OpenFileDialogOpen;
         private System.Windows.Forms.Button buttonReport;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Label label1;
     }
 }
 

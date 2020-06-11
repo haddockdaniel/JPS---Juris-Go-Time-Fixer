@@ -1,0 +1,19 @@
+SELECT
+dbo.jfn_FormatClientCode(clicode) as ClientCode, dbo.jfn_FormatMatterCode(MatCode) as MatterCode,MatBillAgreeCode,
+convert(varchar,[EntryDate], 101) as EntryDate
+,empinitials as WorkingTimekeeper
+,[BillableFlag]
+,[ActualHoursWork]
+,[HoursToBill]
+,[Amount]
+,case when btbillnbr is null then '' else cast(btbillnbr as varchar(10)) end as BillNbr
+, REPLACE(cast(REPLACE(cast(Narrative as varchar(1500)),CHAR(10),' ') as varchar(1500)),CHAR(10),' ') as Narrative
+,case when [EntryStatus] < 7 then 'Draft' when [EntryStatus] = 7 then 'Posted' when [EntryStatus] = 8 then 'On Prebill' else 'Billed' end as [Status]
+,[EntrySource]
+FROM timeentry aa
+left outer join timeentrylink bb on aa.entryid = bb.entryid
+Inner join matter on matsysnbr = MatterSysNbr
+inner join Client on clisysnbr = matclinbr
+inner join employee on timekeepersysnbr=empsysnbr
+left outer join billedtime on btid = bb.tbdid
+where  MatBillAgreeCode in ('N', 'B') and entrysource = 'JurisGo'
